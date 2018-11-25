@@ -96,7 +96,13 @@ def do_deep_learning(model, trainloader, epochs, print_every, criterion, optimiz
                       "Loss: {:.4f}".format(running_loss/print_every))
 
                 running_loss = 0
-    
+
+data_transforms = transforms.Compose([transforms.CenterCrop(224), transforms.ToTensor(),
+                              transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                             ])
+
+image_datasets = datasets.ImageFolder(arguments.dir, transform=data_transforms)
+dataloaders = torch.utils.data.DataLoader(image_datasets,batch_size=100, shuffle=True)
 criterion = nn.NLLLoss()
 optimizer = optim.Adam(model.classifier.parameters(), lr=arguments.lrate)    
 do_deep_learning(model, dataloaders, 3, arguments.epochs, criterion, optimizer, device)

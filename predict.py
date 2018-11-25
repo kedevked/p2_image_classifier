@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 from torchvision import datasets, transforms, models
 from PIL import Image
 import os
+from torch.autograd import Variable
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('image', nargs='?', dest='image' help='image path')
+parser.add_argument('image', nargs='?', dest='image', help='image path')
+
 parser.add_argument('dir', nargs='?', dest='checkpoint', help='checkpoint file')
 
 parser.add_argument('--topk', action='store',
@@ -83,19 +85,17 @@ def predict(image_path, model, topk=5):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
     # TODO: Implement the code to predict the class from an image file
-    img = process_image(Image.open(image_path))
+    image = Image.open(image_path)
+    img = process_image(image)
     
     model.eval()
-    # Convert 2D image to 1D vector
-    img = img.view(1, 1024)
 
     # Calculate the class probabilities (softmax) for img
     with torch.no_grad():
-        output = model.forward(img)
+        output = model.forward(Variable(torch.FloatTensor([img])))
 
     ps, indices = torch.exp(output).topk(5)
-    dicc = cat_to_name if arguments.categories else model.class_to_idx.items()
-    index_to_class = {v: k for k, v in dicc}
-    return ps, [index_to_class[index] for index in indices]
+    index_to_class = {v: k for k, v in model.class_to_idx.items()}
+    return ps.numpy().flatten().tolist(), [index_to_class[index] for index in indices.numpy().flatten().tolist()]
 
 predict(arguments.image, loaded_model, arguments.topk)
