@@ -37,6 +37,8 @@ parser.add_argument('--gpu',
 
 arguments = parser.parse_args()
 
+device = 'gpu' if arguments.gpu and torch.cuda.is_available() else 'cpu'
+
 def load_checkpoint(model):
     model = models.densenet121(pretrained=True)
     
@@ -88,6 +90,10 @@ def predict(image_path, model, topk=5):
     image = Image.open(image_path)
     img = process_image(image)
     
+    # move model and input to gpu if available
+    model.to(device)
+    img.to(device)
+
     model.eval()
 
     # Calculate the class probabilities (softmax) for img

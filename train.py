@@ -65,7 +65,9 @@ classifier = nn.Sequential(OrderedDict([
                       ('output', nn.LogSoftmax(dim=1))]))
 
 model.classifier = classifier
-device = 'gpu' if arguments.gpu else 'cpu'
+
+device = 'gpu' if arguments.gpu and torch.cuda.is_available() else 'cpu'
+
 def do_deep_learning(model, trainloader, epochs, print_every, criterion, optimizer, device='cpu'):
     epochs = epochs
     print_every = print_every
